@@ -1,0 +1,12 @@
+-- Búsquedas frecuentes
+INDEX idx_ordenes_estado (estado_global)              -- Filtros dashboard
+INDEX idx_orden_area_estado (estado_parcial)          -- Consultas por área
+INDEX idx_historial_orden (orden_id, timestamp)       -- Timeline ordenada
+
+-- Joins comunes
+INDEX idx_orden_area_orden_id (orden_id)              -- FK acelerada
+INDEX idx_orden_area_area_id (area_id)                -- FK acelerada
+
+-- Reportes y KPIs
+INDEX idx_ordenes_creada_en (creada_en)               -- Órdenes recientes
+INDEX idx_orden_area_seg (seg_acumulados)             -- SLA vencidos
