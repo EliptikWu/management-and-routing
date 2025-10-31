@@ -1,11 +1,17 @@
 """
 Aplicación principal FastAPI
+Sistema de Enrutamiento de Órdenes Multiárea
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from sqlalchemy import func
 
 from src.config import settings
 from src.routers import ordenes_router, areas_router
+from src.database import SessionLocal
+from src.models import Orden
 
 # Crear aplicación
 app = FastAPI(
@@ -25,6 +31,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Servir archivos estáticos
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
+
 # Registrar routers
 app.include_router(ordenes_router)
 app.include_router(areas_router)
@@ -36,8 +45,16 @@ def health_check():
     return {
         "status": "ok",
         "service": "Enrutador de Órdenes Multiárea",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "docs": "/docs",
+        "frontend": "/app"
     }
+
+
+@app.get("/app", tags=["Frontend"])
+def frontend():
+    """Sirve la aplicación frontend"""
+    return FileResponse("src/static/index.html")
 
 
 @app.get("/kpis", tags=["KPIs"])
@@ -45,30 +62,41 @@ def obtener_kpis():
     """
     KPIs básicos del sistema
     
-    TODO: Implementar con queries agregadas
+    Retorna:
+    - total_ordenes: Total de órdenes en el sistema
+    - completadas: Órdenes con estado COMPLETADA
+    - pendientes: Órdenes en estados PENDIENTE, EN_PROGRESO o ASIGNADA
+    - cerradas_sin_solucion: Órdenes cerradas sin resolver
     """
-    from src.database import SessionLocal
-    from src.models import Orden
-    from sqlalchemy import func
-    
     db = SessionLocal()
     try:
-        total = db.query(func.count(Orden.id)).scalar()
+        total = db.query(func.count(Orden.id)).scalar() or 0
+        
         completadas = db.query(func.count(Orden.id)).filter(
             Orden.estado_global == 'COMPLETADA'
-        ).scalar()
+        ).scalar() or 0
+        
         pendientes = db.query(func.count(Orden.id)).filter(
-            Orden.estado_global.in_(['PENDIENTE', 'EN_PROGRESO', 'ASIGNADA'])
-        ).scalar()
+            Orden.estado_global.in_(['PENDIENTE', 'EN_PROGRESO', 'ASIGNADA', 'NUEVA'])
+        ).scalar() or 0
+        
         sin_solucion = db.query(func.count(Orden.id)).filter(
             Orden.estado_global == 'CERRADA_SIN_SOLUCION'
-        ).scalar()
+        ).scalar() or 0
         
         return {
             "total_ordenes": total,
             "completadas": completadas,
             "pendientes": pendientes,
             "cerradas_sin_solucion": sin_solucion
+        }
+    except Exception as e:
+        return {
+            "total_ordenes": 0,
+            "completadas": 0,
+            "pendientes": 0,
+            "cerradas_sin_solucion": 0,
+            "error": str(e)
         }
     finally:
         db.close()

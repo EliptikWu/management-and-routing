@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enrutador de Órdenes Multiárea</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Sistema de Gestión de Órdenes</h1>
+            <p class="subtitle">Enrutamiento Multiárea con Temporizador SLA</p>
+        </header>
+
+        <!-- KPIs Dashboard -->
+        <section class="kpis" aria-label="Indicadores clave de rendimiento">
+            <div class="kpi-card" id="kpi-total">
+                <div class="kpi-icon">📊</div>
+                <div class="kpi-content">
+                    <h3 class="kpi-value" id="total-ordenes">--</h3>
+                    <p class="kpi-label">Total de Órdenes</p>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-success" id="kpi-completadas">
+                <div class="kpi-icon">✅</div>
+                <div class="kpi-content">
+                    <h3 class="kpi-value" id="completadas">--</h3>
+                    <p class="kpi-label">Completadas</p>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-warning" id="kpi-pendientes">
+                <div class="kpi-icon">⏳</div>
+                <div class="kpi-content">
+                    <h3 class="kpi-value" id="pendientes">--</h3>
+                    <p class="kpi-label">Pendientes</p>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-danger" id="kpi-sin-solucion">
+                <div class="kpi-icon">❌</div>
+                <div class="kpi-content">
+                    <h3 class="kpi-value" id="sin-solucion">--</h3>
+                    <p class="kpi-label">Sin Solución</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtros y Acciones -->
+        <section class="filters" aria-label="Filtros de búsqueda">
+            <div class="filter-group">
+                <label for="estado-filter" class="filter-label">Filtrar por estado:</label>
+                <select id="estado-filter" class="filter-select" aria-label="Filtrar órdenes por estado">
+                    <option value="">Todos los estados</option>
+                    <option value="NUEVA">Nueva</option>
+                    <option value="ASIGNADA">Asignada</option>
+                    <option value="EN_PROGRESO">En Progreso</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="COMPLETADA">Completada</option>
+                    <option value="CERRADA_SIN_SOLUCION">Cerrada Sin Solución</option>
+                    <option value="VENCIDA">Vencida</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <button id="btn-refresh" class="btn btn-primary" aria-label="Actualizar lista de órdenes">
+                    🔄 Actualizar
+                </button>
+                <button id="btn-nueva-orden" class="btn btn-success" aria-label="Crear nueva orden">
+                    ➕ Nueva Orden
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading" hidden aria-live="polite">
+            <div class="spinner"></div>
+            <p>Cargando órdenes...</p>
+        </div>
+
+        <!-- Mensajes de Error -->
+        <div id="error-message" class="alert alert-error" hidden role="alert" aria-live="assertive"></div>
+
+        <!-- Lista de Órdenes -->
+        <section class="ordenes-section" aria-label="Lista de órdenes">
+            <div class="section-header">
+                <h2>Órdenes de Trabajo</h2>
+                <span id="ordenes-count" class="count-badge">0 órdenes</span>
+            </div>
+
+            <!-- Vista de Tabla (Desktop) -->
+            <div class="table-responsive" role="region" aria-label="Tabla de órdenes" tabindex="0">
+                <table class="ordenes-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Título</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Prioridad</th>
+                            <th scope="col">Áreas</th>
+                            <th scope="col">Tiempo (seg)</th>
+                            <th scope="col">Actualización</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordenes-tbody">
+                        <!-- Filas generadas dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Vista de Cards (Mobile) -->
+            <div id="ordenes-cards" class="ordenes-cards">
+                <!-- Cards generadas dinámicamente -->
+            </div>
+
+            <!-- Mensaje cuando no hay órdenes -->
+            <div id="empty-state" class="empty-state" hidden>
+                <div class="empty-icon">📋</div>
+                <h3>No hay órdenes disponibles</h3>
+                <p>Crea una nueva orden para comenzar</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Script JavaScript -->
+    <script src="js/ordenes.js"></script>
+</body>
+</html>

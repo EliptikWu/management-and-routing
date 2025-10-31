@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Orden - Sistema de Gestión</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/detalle.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header con navegación -->
+        <header class="header-detalle">
+            <button onclick="volverAtras()" class="btn-back" aria-label="Volver a la lista">
+                ← Volver
+            </button>
+            <div class="header-info">
+                <h1 id="orden-titulo">Cargando...</h1>
+                <p class="orden-meta">
+                    <span id="orden-id" class="orden-id-badge">--</span>
+                    <span id="orden-creador" class="creador-info">--</span>
+                </p>
+            </div>
+            <button id="btn-refresh-detalle" class="btn btn-primary" aria-label="Actualizar información">
+                🔄 Actualizar
+            </button>
+        </header>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading" hidden aria-live="polite">
+            <div class="spinner"></div>
+            <p>Cargando información...</p>
+        </div>
+
+        <!-- Mensajes -->
+        <div id="success-message" class="alert alert-success" hidden role="status" aria-live="polite"></div>
+        <div id="error-message" class="alert alert-error" hidden role="alert" aria-live="assertive"></div>
+
+        <!-- Información General de la Orden -->
+        <section class="orden-info-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Estado Global</span>
+                    <div id="estado-global-badge">--</div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Prioridad</span>
+                    <div id="prioridad-badge">--</div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Creada</span>
+                    <span id="fecha-creacion" class="info-value">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Última Actualización</span>
+                    <span id="fecha-actualizacion" class="info-value">--</span>
+                </div>
+            </div>
+
+            <div class="descripcion-section">
+                <h3 class="section-subtitle">Descripción</h3>
+                <p id="orden-descripcion" class="descripcion-text">--</p>
+            </div>
+        </section>
+
+        <!-- Grid de Contenido Principal -->
+        <div class="detalle-grid">
+            <!-- Columna Izquierda: Áreas Asignadas -->
+            <section class="areas-section">
+                <div class="section-header-detalle">
+                    <h2>Áreas Asignadas</h2>
+                    <span id="areas-count" class="count-badge">0 áreas</span>
+                </div>
+
+                <div id="areas-container" class="areas-list">
+                    <!-- Áreas generadas dinámicamente -->
+                </div>
+
+                <div id="areas-empty" class="empty-state-small" hidden>
+                    <p>No hay áreas asignadas a esta orden</p>
+                </div>
+            </section>
+
+            <!-- Columna Derecha: Historial -->
+            <section class="historial-section">
+                <div class="section-header-detalle">
+                    <h2>Historial de Eventos</h2>
+                    <span id="historial-count" class="count-badge">0 eventos</span>
+                </div>
+
+                <div id="historial-container" class="historial-timeline">
+                    <!-- Eventos generados dinámicamente -->
+                </div>
+
+                <div id="historial-empty" class="empty-state-small" hidden>
+                    <p>No hay eventos registrados</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="modal-confirmacion" class="modal" hidden role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="modal-overlay" onclick="cerrarModal()"></div>
+        <div class="modal-content">
+            <h3 id="modal-title" class="modal-title">Confirmar Acción</h3>
+            <p id="modal-mensaje" class="modal-mensaje"></p>
+            
+            <div id="modal-notas-group" class="form-group" hidden>
+                <label for="modal-notas" class="form-label">Notas (opcional):</label>
+                <textarea 
+                    id="modal-notas" 
+                    class="form-textarea" 
+                    rows="3" 
+                    placeholder="Agrega comentarios sobre esta acción..."
+                    maxlength="500"
+                ></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-modal-cancelar" class="btn btn-secondary" onclick="cerrarModal()">
+                    Cancelar
+                </button>
+                <button id="btn-modal-confirmar" class="btn btn-primary">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/detalle.js"></script>
+</body>
+</html>
