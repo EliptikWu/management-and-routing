@@ -7,19 +7,39 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy import func
+from contextlib import asynccontextmanager
 
 from src.config import settings
 from src.routers import ordenes_router, areas_router
+from src.routers.temporizador import router as temporizador_router
 from src.database import SessionLocal
 from src.models import Orden
+from src.scheduler import temporizador_scheduler
 
-# Crear aplicación
+
+# Lifespan para iniciar/detener el scheduler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Maneja el ciclo de vida de la aplicación"""
+    # Startup: Iniciar temporizador
+    print("🚀 Iniciando aplicación...")
+    temporizador_scheduler.iniciar()
+    
+    yield
+    
+    # Shutdown: Detener temporizador
+    print("⏹️  Deteniendo aplicación...")
+    temporizador_scheduler.detener()
+
+
+# Crear aplicación con lifespan
 app = FastAPI(
     title="Sistema de Enrutamiento de Órdenes Multiárea",
     description="MVP para gestión de órdenes con asignación multiárea y temporizador SLA",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # CORS
@@ -37,6 +57,7 @@ app.mount("/static", StaticFiles(directory="src/static"), name="static")
 # Registrar routers
 app.include_router(ordenes_router)
 app.include_router(areas_router)
+app.include_router(temporizador_router)
 
 
 @app.get("/", tags=["Health"])
@@ -47,7 +68,8 @@ def health_check():
         "service": "Enrutador de Órdenes Multiárea",
         "version": "1.0.0",
         "docs": "/docs",
-        "frontend": "/app"
+        "frontend": "/app",
+        "temporizador": "activo"
     }
 
 
@@ -84,11 +106,16 @@ def obtener_kpis():
             Orden.estado_global == 'CERRADA_SIN_SOLUCION'
         ).scalar() or 0
         
+        vencidas = db.query(func.count(Orden.id)).filter(
+            Orden.estado_global == 'VENCIDA'
+        ).scalar() or 0
+        
         return {
             "total_ordenes": total,
             "completadas": completadas,
             "pendientes": pendientes,
-            "cerradas_sin_solucion": sin_solucion
+            "cerradas_sin_solucion": sin_solucion,
+            "vencidas": vencidas
         }
     except Exception as e:
         return {
@@ -96,6 +123,7 @@ def obtener_kpis():
             "completadas": 0,
             "pendientes": 0,
             "cerradas_sin_solucion": 0,
+            "vencidas": 0,
             "error": str(e)
         }
     finally:
